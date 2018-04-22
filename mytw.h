@@ -20,10 +20,12 @@ struct hashtable {
     int items;
 };
 
+int hash(const char* word);
+
 void open_files(int argc, char *argv[], FILE **files);
 
 void get_line(FILE *file, char *line);
 
-void add_word(char *word, HashTable hash_table);
+void add_word(char *word, int hash_code, HashTable hash_table);
 
 HashTable init_table();

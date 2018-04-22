@@ -40,6 +40,7 @@ void get_words(char *line, HashTable hash_table) {
     int i;
     int j;
     char *current_word = (char *)malloc(sizeof(char) * strlen(line));
+    int hash_code;
     for(i = 0, j = 0; i < strlen(line); i++) {
         if(isalpha(line[i])) {
             current_word[j] = line[i];
@@ -49,7 +50,8 @@ void get_words(char *line, HashTable hash_table) {
             current_word[j] = '\0';
             printf("%s ", current_word);
             if(current_word[0] != '\n' || current_word[0] != '\0') {
-                add_word(current_word, hash_table);
+                hash_code = hash(current_word);
+                add_word(current_word, hash_code, hash_table);
             }
             free(current_word);
             current_word = NULL;
@@ -69,17 +71,16 @@ int hash (const char* word) {
         hash = 31 * hash + word[i];
     }
     return hash;
-}
+}   
 
-void add_word(char *word, HashTable hash_table) {
-    int hash_code;
-    Occurence *new_word = (Occurence *)malloc(sizeof(Occurence));
-    printf("%s ", word);
-    new_word->word = word;
-    new_word->frequency = 1;
-    hash_code = hash(new_word->word);
+void add_word(char *word, int hash_code, HashTable hash_table) {
+    Occurence *new_word = NULL;
     while(1) {
         if(hash_table.table[hash_code % hash_table.size] == 0) {
+            new_word = (Occurence *)malloc(sizeof(Occurence));
+            printf("%s ", word);
+            new_word->word = word;
+            new_word->frequency = 1;
             hash_table.table[hash_code % hash_table.size] = new_word;
             break;
         }
