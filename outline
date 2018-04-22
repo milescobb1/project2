@@ -1,0 +1,70 @@
+struct occurence {
+    char *word;
+    int frequency;
+}
+
+char[] open_files(char *argv[]) {
+    Open files
+    Return list of file pointers
+}
+
+char* get_line(FILE *file) {
+    Get arbitrarily long line, terminating on newline or EOF
+    Return line
+}
+
+void get_words(char *line) {
+    Remove all puncuation from line
+    Split line into words, delimiting with spaces
+    Turn each word into lowercase
+    Use add_word(word)
+}
+
+void add_word(char *word) {
+    Create new instance of occurence struct
+    Add to hash table with hash(occurence)
+}
+
+int hash(struct occurence) {
+    Use word element to hash into table
+    If word already in table, increment that word's times element instead
+    Return 1 if successfully added or incremented, 0 if something went wrong
+}
+
+struct occurence[] create_occurence_list(struct occurence[] hash_table) {
+    Use quicksort to sort hash_table, using compare_occurences(occurence1, occurence2)
+    Remove all empty entries in hash_table
+    Return sorted list of occurences
+}
+
+int compare_occurences(struct occurence o1, struct occurence o2) {
+    Compare occurences using first frequencies, then lexigraphical order
+    Return 0 if equal, -1 if o1 is first, 1 if o2 is first
+}
+
+void display_results(struct occurence[] occurence_list, int num_words) {
+    Print the top num_words words and frequencies
+}
+
+int main(int argc, int *argv[]) {
+    struct occurence[] hash_table = NULL
+    int num_words = argv[i]
+    open_files(argv)
+    for each file {
+        for each line {
+            char *line = get_line(file)
+            char *words[] = get_words(line)
+            add_words(words[])
+        }
+    }
+    struct occurence_list[] = create_occurence_list(hash_table[])
+    display_results(occurence_list[], num_words)
+}
+
+Unit and System tests:
+    Test files are opened and added to file list properly
+    Test that lines of arbitrary length are properly read and stored
+    Check that lines are processed into words correctly
+    Test that hash table works
+    Make sure 
+
