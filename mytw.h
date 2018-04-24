@@ -2,30 +2,37 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <errno.h>
 
-typedef struct occurence Occurence;
+typedef struct occurrence Occurrence;
 
 typedef struct hashtable HashTable;
 
 #define TABLESIZE 1000
 
-struct occurence {
+struct occurrence {
     char *word;
     int frequency;
 };
 
 struct hashtable {
-    Occurence *table[TABLESIZE];
+    Occurrence **table;
     int size;
     int items;
 };
 
-int hash(const char* word);
+unsigned long hash (const char* word);
 
-void open_files(int argc, char *argv[], FILE **files);
+void rehash(HashTable *hash_table);
 
-void get_line(FILE *file, char *line);
+int parse_input(int argc, int *num_files, int *n, char *argv[], FILE **files);
 
-void add_word(char *word, int hash_code, HashTable hash_table);
+void open_files(int *num_files, int start, int end, char *argv[], FILE **files);
+
+char *get_line(FILE *file, char *line);
+
+void get_words(char *line, HashTable* hash_table);
+
+void add_word(char *word, int hash_code, HashTable *hash_table);
 
 HashTable init_table();
