@@ -33,6 +33,6 @@ char *get_line(FILE *file, char *line);
 
 void get_words(char *line, HashTable* hash_table);
 
-void add_word(char *word, int hash_code, HashTable *hash_table);
+void add_word(char *word, unsigned long hash_code, HashTable *hash_table);
 
 HashTable init_table();

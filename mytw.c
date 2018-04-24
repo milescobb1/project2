@@ -3,49 +3,61 @@
 HashTable init_table() {
     int i;
     HashTable hash_table;
-    hash_table.table = (Occurrence**) calloc(sizeof(Occurrence), TABLESIZE);
     hash_table.size = TABLESIZE;
     hash_table.items = 0;
+    hash_table.table = (Occurrence**)malloc(sizeof(Occurrence) * TABLESIZE);
+    for(i = 0; i < TABLESIZE; i++) {
+        hash_table.table[i] = NULL;
+    }
     return hash_table;
 }
 
 
-void add_word(char *word, int hash_code, HashTable *hash_table) {
+void add_word(char *word, unsigned long hash_code, HashTable *hash_table) {
+    unsigned long index;
     Occurrence *new_word = NULL;
-    while(1) {
-        if(!hash_table->table[hash_code % (hash_table->size)] ||
-                !hash_table->table[hash_code % (hash_table->size)]->word) {
-            new_word = (Occurrence *)malloc(sizeof(Occurrence));
-            new_word->word = (char *) malloc(sizeof(char) * strlen(word) + 1); 
-            strcpy(new_word->word, word);
-            new_word->frequency = 1;
-            hash_table->table[hash_code % hash_table->size] = new_word;
-            if(++hash_table->items / ((double)hash_table->size) > .33){
-                rehash(hash_table);
-            }
-            break;
-        }
-        else if (0 == strcmp(hash_table->table[hash_code % hash_table->size] -> word, word)){
-            (hash_table->table[hash_code % hash_table->size])->frequency += 1;
-            break;
+    hash_code = hash_code % hash_table->size;
+    index = hash_code;
+    hash_table->items++;
+    new_word = (Occurrence *)malloc(sizeof(Occurrence));
+    new_word->word = (char *)malloc(sizeof(char) * strlen(word) + 1); 
+    strcpy(new_word->word, word);
+    new_word->frequency = 1;
+    if(hash_table->items / ((double)hash_table->size) > .33){
+        rehash(hash_table);
+    }
+    while(hash_table->table[hash_code]) {
+        if (!strcmp(hash_table->table[hash_code] -> word, word)){
+            (hash_table->table[hash_code])->frequency += 1;
+            free(new_word->word);
+            free(new_word);
+            return;
         }
         else {
-            hash_code ++;
+            hash_code++;
+            if(hash_code == index) {
+                return;
+            }
         }
     }
-    printf("%s %d \n", hash_table->table[hash_code % (hash_table->size)] ->word, hash_table->table[hash_code % (hash_table->size)]->frequency);
+    hash_table->table[hash_code] = new_word;
+    printf("%s %d \n", hash_table->table[hash_code] ->word, hash_table->table[hash_code]->frequency);
 }
 
 void rehash(HashTable *hash_table) {
-    int i =0;
-    Occurrence *newTable = (Occurrence*) calloc(sizeof(Occurrence), hash_table->size * 2);
+    int i;
+    Occurrence **newTable = (Occurrence**)malloc(sizeof(Occurrence*) * hash_table->size * 2);
     Occurrence **temp = hash_table->table;
-    hash_table->table = &newTable;
+    hash_table->table = newTable;
     hash_table->items = 0;
     hash_table->size *= 2;
-    for(; i < hash_table->size; i++) {
-        if(temp[i]->frequency)
-            add_word((temp[i])->word, hash((temp[i])->word), hash_table);
+    for(i = 0; i < hash_table->size; i++) {
+        hash_table->table[i] = NULL;
+    }
+    for(i = 0; i < hash_table->size / 2; i++) {
+        if(temp[i])
+            add_word(temp[i]->word, hash(temp[i]->word), hash_table);
+            free(temp[i]);
     }
 }
 
@@ -149,7 +161,6 @@ void get_words(char *line, HashTable *hash_table) {
 unsigned long hash (const char* word) {
     int i;
     unsigned int hash;
-    hash = 0;
     return 0;
     for (i = 0 ; word[i] != '\0' ; i++)
     {
