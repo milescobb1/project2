@@ -8,7 +8,7 @@ typedef struct occurrence Occurrence;
 
 typedef struct hashtable HashTable;
 
-#define TABLESIZE 1000
+#define TABLESIZE 5
 
 struct occurrence {
     char *word;

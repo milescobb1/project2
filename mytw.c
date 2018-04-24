@@ -3,7 +3,7 @@
 HashTable init_table() {
     int i;
     HashTable hash_table;
-    hash_table.table = (Occurrence**) malloc(sizeof(Occurrence) * TABLESIZE);
+    hash_table.table = (Occurrence**) calloc(sizeof(Occurrence), TABLESIZE);
     hash_table.size = TABLESIZE;
     hash_table.items = 0;
     return hash_table;
@@ -21,7 +21,7 @@ void add_word(char *word, int hash_code, HashTable *hash_table) {
             new_word->frequency = 1;
             hash_table->table[hash_code % hash_table->size] = new_word;
             if(++hash_table->items / ((double)hash_table->size) > .33){
-                // rehash(hash_table);
+                rehash(hash_table);
             }
             break;
         }
@@ -34,18 +34,18 @@ void add_word(char *word, int hash_code, HashTable *hash_table) {
         }
     }
     printf("%s %d \n", hash_table->table[hash_code % (hash_table->size)] ->word, hash_table->table[hash_code % (hash_table->size)]->frequency);
-
 }
 
 void rehash(HashTable *hash_table) {
-    Occurrence *newTable = (Occurrence*) malloc(sizeof(Occurrence) * hash_table->size * 2);
-    Occurrence **current = hash_table->table;
+    int i =0;
+    Occurrence *newTable = (Occurrence*) calloc(sizeof(Occurrence), hash_table->size * 2);
+    Occurrence **temp = hash_table->table;
     hash_table->table = &newTable;
     hash_table->items = 0;
     hash_table->size *= 2;
-    while(*current) {
-        add_word((*current)->word, hash((*current)->word), hash_table);
-        current++;
+    for(; i < hash_table->size; i++) {
+        if(temp[i]->frequency)
+            add_word((temp[i])->word, hash((temp[i])->word), hash_table);
     }
 }
 
