@@ -1,7 +1,36 @@
 #include "mytw.h"
 
+
+void quickSort( Occurrence *a[], int l, int r)
+{
+    int j;
+
+    if( l < r ) 
+    {
+        j = partition( a, l, r);
+        quickSort( a, l, j-1);
+        quickSort( a, j+1, r);
+    }
+}
+
+int partition( Occurrence *a[], int l, int r) {
+    int pivot, i, j;
+    Occurrence *t;
+    pivot = a[l] ? a[l]->frequency : 0;
+    i = l; j = r+1;
+        
+    while( 1)
+    {
+        do ++i; while( a[i] != NULL && a[i]->frequency <= pivot && i <= r );
+        do --j; while( a[j] == NULL || a[j]->frequency > pivot );
+        if( i >= j ) break;
+        t = a[i]; a[i] = a[j]; a[j] = t;
+    }
+    t = a[l]; a[l] = a[j]; a[j] = t;
+    return j;
+}
+
 HashTable init_table() {
-    int i;
     HashTable hash_table;
     hash_table.size = TABLESIZE;
     hash_table.items = 0;
@@ -51,6 +80,7 @@ void rehash(HashTable *hash_table) {
     hash_table->table = newTable;
     hash_table->items = 0;
     hash_table->size *= 2;
+<<<<<<< Updated upstream
     for(i = 0; i < hash_table->size; i++) {
         hash_table->table[i] = NULL;
     }
@@ -58,6 +88,13 @@ void rehash(HashTable *hash_table) {
         if(temp[i])
             add_word(temp[i]->word, hash(temp[i]->word), hash_table);
             free(temp[i]);
+=======
+    for(; i < hash_table->size; i++) {
+        if(temp[i]->frequency) {
+            printf("Rehasing word: %s\n", temp[i]->word);
+            add_word((temp[i])->word, hash((temp[i])->word), hash_table);
+        }
+>>>>>>> Stashed changes
     }
 }
 
@@ -196,5 +233,6 @@ int main(int argc, char *argv[]) {
         }
         free(line);
     }
+    quickSort(hash_table.table, 0, hash_table.size);
     return 0;
 }

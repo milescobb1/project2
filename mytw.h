@@ -8,7 +8,7 @@ typedef struct occurrence Occurrence;
 
 typedef struct hashtable HashTable;
 
-#define TABLESIZE 5
+#define TABLESIZE 500
 
 struct occurrence {
     char *word;
@@ -20,6 +20,10 @@ struct hashtable {
     int size;
     int items;
 };
+
+int partition( Occurrence *a[], int l, int r);
+
+void quickSort( Occurrence *a[], int l, int r);
 
 unsigned long hash (const char* word);
 
