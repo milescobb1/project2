@@ -137,8 +137,7 @@ void open_files(int *num_files, int start, int end, char *argv[], FILE **files) 
     for(i = 0; i < end - start; i++) {
         new_file = fopen(argv[i + start], "r");
         if(new_file) {
-            files[i] = new_file;
-            (*num_files)++;
+            files[(*num_files)++] = new_file;
         }
         else {
             fprintf(stderr, "Cannot open file: %s\n", strerror(errno));
