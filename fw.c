@@ -108,7 +108,7 @@ int parse_input(int argc, int *num_files, int *n, char *argv[], FILE **files) {
                     (*n) += atoi(&argv[2][i]);
                 }
                 else {
-                    fprintf(stderr, "usage: tw -n <num> file1 [file2...]\n");
+                    fprintf(stderr, "Usage: tw -n <num> file1 [file2...]\n");
                     exit(0);
                     return -1;
                 }
@@ -123,11 +123,8 @@ int parse_input(int argc, int *num_files, int *n, char *argv[], FILE **files) {
         }
         else {
             *n = 10;
-            if(argc > 1) {
-                open_files(num_files, 1, argc, argv, files);
-                return 1;
-            }
-            return 0;
+            open_files(num_files, 1, argc, argv, files);
+            return 1;
         }
     }
     *n = 10;
@@ -144,7 +141,7 @@ void open_files(int *num_files, int start, int end, char *argv[], FILE **files) 
             (*num_files)++;
         }
         else {
-            fprintf(stderr, "Cannot open file: %s", strerror(errno));
+            fprintf(stderr, "Cannot open file: %s\n", strerror(errno));
         }
     }
 }
@@ -220,11 +217,13 @@ int main(int argc, char *argv[]) {
     input = parse_input(argc, &num_files, &n, argv, files);
     if(input > 0) {
         for(i = 0; i < num_files; i++) {
-            while((line = get_line(files[i], line)) && line[0] != '\0') {
-                get_words(line, &hash_table);
-                memset(line, 0, sizeof(char) * 100);
+            if(files[i]) {
+                while((line = get_line(files[i], line)) && line[0] != '\0') {
+                    get_words(line, &hash_table);
+                    memset(line, 0, sizeof(char) * 100);
+                }
+                fclose(files[i]);
             }
-            fclose(files[i]);
         }
     }
     else {
@@ -248,12 +247,12 @@ int main(int argc, char *argv[]) {
         printf("%9d %s\n", occurrences[i]->frequency, occurrences[i]->word);
     }
     for(i = 0, p = 0; i < hash_table.size; i++) {
-            if(hash_table.table[i]) {
-                free(hash_table.table[i]->word);
-                free(hash_table.table[i]);
-                p++;
-            }
+        if(hash_table.table[i]) {
+            free(hash_table.table[i]->word);
+            free(hash_table.table[i]);
+            p++;
         }
+    }
     free(occurrences);
     free(hash_table.table);
     return 0;
