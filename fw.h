@@ -8,7 +8,7 @@ typedef struct occurrence Occurrence;
 
 typedef struct hashtable HashTable;
 
-#define TABLESIZE 500
+#define TABLESIZE 1000
 
 struct occurrence {
     char *word;
@@ -37,10 +37,6 @@ char *get_line(FILE *file, char *line);
 
 void get_words(char *line, HashTable* hash_table);
 
-void add_word(char *word, unsigned long hash_code, HashTable *hash_table);
+void add_word(char *word, int frequency, unsigned long hash_code, HashTable *hash_table);
 
 HashTable init_table();
-
-void print_table(HashTable *hash_table);
-
-int comparator(const void *p, const void *q);

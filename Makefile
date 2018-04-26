@@ -1,15 +1,17 @@
 CC = gcc
 CFLAGS = -Wall -ansi -g -pedantic
-MAIN = mytw
-OBJS = mytw.o
+MAIN = fw
+OBJS = fw.o
 
 all : $(MAIN)
 
-$(MAIN) : $(OBJS) mytw.h
+fw : all
+
+$(MAIN) : $(OBJS) fw.h
 	$(CC) $(CFLAGS) -o $(MAIN) $(OBJS)
 
-mytw.o : mytw.c mytw.h
-	$(CC) $(CFLAGS) -c mytw.c
+fw.o : fw.c fw.h
+	$(CC) $(CFLAGS) -c fw.c
 
 clean : 
 	rm *.o $(MAIN) 
