@@ -13,15 +13,29 @@ void quickSort( Occurrence *a[], int l, int r)
     }
 }
 
+int isBigger(Occurrence *a, Occurrence *b) {
+    if(a && b) {
+        if(a->frequency != b->frequency) {
+            return a->frequency > b->frequency;
+        }
+        else {
+            return strcmp(a->word, b->word);
+        }
+    }
+    if( !b )
+        return a == NULL;
+    return(a != NULL);
+}
+
 int partition( Occurrence *a[], int l, int r) {
-    int pivot, i, j;
-    Occurrence *t;
-    pivot = a[l] ? a[l]->frequency : 0;
+    int i, j;
+    Occurrence *t, *pivot;
+    pivot = a[l];
     i = l; j = r+1;
     while(1)
     {
-        do ++i; while(( a[i] ? (a[i]->frequency) : 0 ) >= pivot && i <= r );
-        do --j; while(( a[j] ? (a[j]->frequency) : 0 ) < pivot );
+        do ++i; while(isBigger(a[i], pivot));
+        do --j; while(isBigger(pivot,a[j]));
         if( i >= j ) break;
         t = a[i]; a[i] = a[j]; a[j] = t;
     }
@@ -47,19 +61,12 @@ void add_word(char *word, unsigned long hash_code, HashTable *hash_table) {
     Occurrence *new_word = NULL;
     hash_code = hash_code % hash_table->size;
     index = hash_code;
-    hash_table->items++;
-    new_word = (Occurrence *)malloc(sizeof(Occurrence));
-    new_word->word = (char *)malloc(sizeof(char) * strlen(word) + 1); 
-    strcpy(new_word->word, word);
-    new_word->frequency = 1;
     if(hash_table->items / ((double)hash_table->size) > .33){
         rehash(hash_table);
     }
     while(hash_table->table[hash_code]) {
         if (!strcmp(hash_table->table[hash_code] -> word, word)){
             (hash_table->table[hash_code])->frequency += 1;
-            free(new_word->word);
-            free(new_word);
             return;
         }
         else {
@@ -69,8 +76,12 @@ void add_word(char *word, unsigned long hash_code, HashTable *hash_table) {
             }
         }
     }
+    hash_table->items++;
+    new_word = (Occurrence *)malloc(sizeof(Occurrence));
+    new_word->word = (char *)malloc(sizeof(char) * strlen(word) + 1); 
+    strcpy(new_word->word, word);
+    new_word->frequency = 1;
     hash_table->table[hash_code] = new_word;
-    // printf("%s %d \n", hash_table->table[hash_code] ->word, hash_table->table[hash_code]->frequency);
 }
 
 void rehash(HashTable *hash_table) {
@@ -224,14 +235,16 @@ int main(int argc, char *argv[]) {
         }
         free(line);
     }
-
-    quickSort(hash_table.table, 0, hash_table.size-1);
-    for(int ii=0; ii < hash_table.size; ii++) {
-        if(hash_table.table[ii]) {
-            printf("%s %d %d\n", hash_table.table[ii]->word, ii,  hash_table.table[ii]->frequency);
+    for(i=0; i < hash_table.size; i++) {
+        if(hash_table.table[i]) {
+            printf("%s %d %d\n", hash_table.table[i]->word, i,  hash_table.table[i]->frequency);
         }
     }
-    char *a = 'a';
-    // printf("%d\n", hash(a));
+    quickSort(hash_table.table, 0, hash_table.size-1);
+    for(i=0; i < hash_table.size; i++) {
+        if(hash_table.table[i]) {
+            printf("%s %d %d\n", hash_table.table[i]->word, i,  hash_table.table[i]->frequency);
+        }
+    }
     return 0;
 }
