@@ -21,6 +21,10 @@ struct hashtable {
     int items;
 };
 
+int partition( Occurrence *a[], int l, int r);
+
+void quickSort( Occurrence *a[], int l, int r);
+
 unsigned long hash (const char* word);
 
 void rehash(HashTable *hash_table);
