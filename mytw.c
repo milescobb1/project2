@@ -18,11 +18,10 @@ int partition( Occurrence *a[], int l, int r) {
     Occurrence *t;
     pivot = a[l] ? a[l]->frequency : 0;
     i = l; j = r+1;
-        
-    while( 1)
+    while(1)
     {
-        do ++i; while( a[i] != NULL && a[i]->frequency <= pivot && i <= r );
-        do --j; while( a[j] == NULL || a[j]->frequency > pivot );
+        do ++i; while(( a[i] ? (a[i]->frequency) : 0 ) >= pivot && i <= r );
+        do --j; while(( a[j] ? (a[j]->frequency) : 0 ) < pivot );
         if( i >= j ) break;
         t = a[i]; a[i] = a[j]; a[j] = t;
     }
@@ -31,6 +30,7 @@ int partition( Occurrence *a[], int l, int r) {
 }
 
 HashTable init_table() {
+    int i;
     HashTable hash_table;
     hash_table.size = TABLESIZE;
     hash_table.items = 0;
@@ -70,7 +70,7 @@ void add_word(char *word, unsigned long hash_code, HashTable *hash_table) {
         }
     }
     hash_table->table[hash_code] = new_word;
-    printf("%s %d \n", hash_table->table[hash_code] ->word, hash_table->table[hash_code]->frequency);
+    // printf("%s %d \n", hash_table->table[hash_code] ->word, hash_table->table[hash_code]->frequency);
 }
 
 void rehash(HashTable *hash_table) {
@@ -80,7 +80,6 @@ void rehash(HashTable *hash_table) {
     hash_table->table = newTable;
     hash_table->items = 0;
     hash_table->size *= 2;
-<<<<<<< Updated upstream
     for(i = 0; i < hash_table->size; i++) {
         hash_table->table[i] = NULL;
     }
@@ -88,13 +87,6 @@ void rehash(HashTable *hash_table) {
         if(temp[i])
             add_word(temp[i]->word, hash(temp[i]->word), hash_table);
             free(temp[i]);
-=======
-    for(; i < hash_table->size; i++) {
-        if(temp[i]->frequency) {
-            printf("Rehasing word: %s\n", temp[i]->word);
-            add_word((temp[i])->word, hash((temp[i])->word), hash_table);
-        }
->>>>>>> Stashed changes
     }
 }
 
@@ -197,8 +189,7 @@ void get_words(char *line, HashTable *hash_table) {
 
 unsigned long hash (const char* word) {
     int i;
-    unsigned int hash;
-    return 0;
+    unsigned long hash;
     for (i = 0 ; word[i] != '\0' ; i++)
     {
         hash = 31 * hash + word[i];
@@ -233,6 +224,14 @@ int main(int argc, char *argv[]) {
         }
         free(line);
     }
-    quickSort(hash_table.table, 0, hash_table.size);
+
+    quickSort(hash_table.table, 0, hash_table.size-1);
+    for(int ii=0; ii < hash_table.size; ii++) {
+        if(hash_table.table[ii]) {
+            printf("%s %d %d\n", hash_table.table[ii]->word, ii,  hash_table.table[ii]->frequency);
+        }
+    }
+    char *a = 'a';
+    // printf("%d\n", hash(a));
     return 0;
 }
