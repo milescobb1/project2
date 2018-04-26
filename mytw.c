@@ -27,8 +27,8 @@ void add_word(char *word, unsigned long hash_code, HashTable *hash_table) {
         rehash(hash_table);
     }
     while(hash_table->table[hash_code]) {
-        if (!strcmp(hash_table->table[hash_code] -> word, word)){
-            (hash_table->table[hash_code])->frequency += 1;
+        if (!strcmp(hash_table->table[hash_code]->word, word)){
+            hash_table->table[hash_code]->frequency += 1;
             free(new_word->word);
             free(new_word);
             return;
@@ -36,29 +36,34 @@ void add_word(char *word, unsigned long hash_code, HashTable *hash_table) {
         else {
             hash_code++;
             if(hash_code == index) {
+                hash_table->items--;
                 return;
             }
         }
     }
     hash_table->table[hash_code] = new_word;
-    printf("%s %d \n", hash_table->table[hash_code] ->word, hash_table->table[hash_code]->frequency);
 }
 
 void rehash(HashTable *hash_table) {
     int i;
-    Occurrence **newTable = (Occurrence**)malloc(sizeof(Occurrence*) * hash_table->size * 2);
+    int old_size;
+    Occurrence **newTable = (Occurrence**)malloc(sizeof(Occurrence) * hash_table->size * 2);
     Occurrence **temp = hash_table->table;
     hash_table->table = newTable;
     hash_table->items = 0;
+    old_size = hash_table->size;
     hash_table->size *= 2;
     for(i = 0; i < hash_table->size; i++) {
         hash_table->table[i] = NULL;
     }
-    for(i = 0; i < hash_table->size / 2; i++) {
-        if(temp[i])
+    for(i = 0; i < old_size; i++) {
+        if(temp[i]) {
             add_word(temp[i]->word, hash(temp[i]->word), hash_table);
-            free(temp[i]);
+            free(temp[i]->word);
+        }
+        free(temp[i]);
     }
+    free(temp);
 }
 
 int parse_input(int argc, int *num_files, int *n, char *argv[], FILE **files) {
@@ -160,14 +165,41 @@ void get_words(char *line, HashTable *hash_table) {
 
 unsigned long hash (const char* word) {
     int i;
-    unsigned int hash;
-    return 0;
+    unsigned long hash;
     for (i = 0 ; word[i] != '\0' ; i++)
     {
         hash = 31 * hash + word[i];
     }
     return hash;
-}   
+} 
+
+int comparator(const void *p, const void *q) 
+{
+    if(p && q) {
+        int l = ((Occurrence *)p)->frequency;
+        int r = ((Occurrence *)q)->frequency;
+        printf("%d vs %d\n", l, r);
+        if(l == r) {
+            printf("%s vs %s\n", ((Occurrence *)p)->word, ((Occurrence *)q)->word);
+            return strcmp(((Occurrence *)p)->word, ((Occurrence *)q)->word);
+        } 
+        return (l - r);
+    }
+    return 0;
+}
+
+void print_table(HashTable *hash_table) {
+    int i;
+    // qsort(hash_table, hash_table->size, sizeof(Occurrence *), comparator);
+    for(i = 0; i < hash_table->size; i++) {
+        if(hash_table->table[i]) {
+            printf("%s %d\n", hash_table->table[i]->word, i);
+            free(hash_table->table[i]->word);
+        }
+        free(hash_table->table[i]);
+    }
+    free(hash_table->table);
+}
 
 int main(int argc, char *argv[]) {
     int i;
@@ -178,7 +210,7 @@ int main(int argc, char *argv[]) {
     FILE **files = (FILE **)malloc(sizeof(FILE) * (argc - 1));
     char *line = (char *)malloc(sizeof(char) * 100);
     input = parse_input(argc, &num_files, &n, argv, files);
-    if(n > 0) {
+    if(input> 0) {
         for(i = 0; i < num_files; i++) {
             while((line = get_line(files[i], line)) && line[0] != '\0') {
                 get_words(line, &hash_table);
@@ -190,11 +222,13 @@ int main(int argc, char *argv[]) {
         free(line);
     }
     else {
-        while((line = get_line(stdin, line)) && line[0] != '\0') {
+        while((line = get_line(stdin, line)) && line[0] != '\0' && line[0] != '\n') {
             get_words(line, &hash_table);
             memset(line, 0, sizeof(char) * 100);
         }
+        free(files);
         free(line);
     }
+    print_table(&hash_table);
     return 0;
 }
