@@ -29,9 +29,9 @@ unsigned long hash (const char* word);
 
 void rehash(HashTable *hash_table);
 
-int parse_input(int argc, int *num_files, int *n, char *argv[], FILE **files);
+int parse_input(int argc, char *argv[], HashTable *hash_table);
 
-void open_files(int *num_files, int start, int end, char *argv[], FILE **files);
+void open_files(int start, int end, char *argv[], HashTable *hash_table);
 
 char *get_line(FILE *file, char *line);
 

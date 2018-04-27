@@ -1,6 +1,5 @@
 #include "fw.h"
 
-
 void quick_sort(Occurrence *a[], int l, int r) {
     int j;
     if(l < r) {
@@ -97,14 +96,15 @@ void rehash(HashTable *hash_table) {
 }
 
 /* This is a horrific function */
-int parse_input(int argc, int *num_files, int *n, char *argv[], FILE **files) {
+int parse_input(int argc, char *argv[], HashTable *hash_table) {
     int i;
+    int n;
     if(argc > 1) {
         if(!strcmp(argv[1], "-n")) {
             if(argc > 2) {
                 for(i = 0; i < strlen(argv[2]); i++) {
                     if (isdigit(argv[2][i])) {
-                        (*n) += atoi(&argv[2][i]);
+                        n = atoi(&argv[2][i]);
                     }
                     else {
                         fprintf(stderr, "usage: fw [-n num] [ file1 [ file2 [...] ] ]\n");
@@ -113,11 +113,11 @@ int parse_input(int argc, int *num_files, int *n, char *argv[], FILE **files) {
                     }
                 }
                 if(argc > 3) {
-                    open_files(num_files, 3, argc, argv, files);
-                    return 1;
+                    open_files(3, argc, argv, hash_table);
+                    return n;
                 }
                 else {
-                    return 0;
+                    return -1;
                 }
             }
             else {
@@ -127,22 +127,25 @@ int parse_input(int argc, int *num_files, int *n, char *argv[], FILE **files) {
             }
         }
         else {
-            *n = 10;
-            open_files(num_files, 1, argc, argv, files);
-            return 1;
+            open_files(1, argc, argv, hash_table);
+            return 10;
         }
     }
-    *n = 10;
     return 0;
 }
 
-void open_files(int *num_files, int start, int end, char *argv[], FILE **files) {
+void open_files(int start, int end, char *argv[], HashTable *hash_table) {
     int i;
     FILE *new_file = NULL;
+    char *line = (char *)malloc(sizeof(char) * 100);
     for(i = 0; i < end - start; i++) {
         new_file = fopen(argv[i + start], "r");
         if(new_file) {
-            files[(*num_files)++] = new_file;
+            while((line = get_line(new_file, line)) && line[0] != '\0') {
+                    get_words(line, hash_table);
+                    memset(line, 0, sizeof(char) * 100);
+                }
+            fclose(new_file);
         }
         else {
             fprintf(stderr, "%s: %s\n", argv[i + start], strerror(errno));
@@ -212,29 +215,19 @@ int main(int argc, char *argv[]) {
     int i;
     int p;
     int n = 0;
-    int num_files = 0;
-    int input;
     Occurrence **occurrences = NULL;
     HashTable hash_table = init_table();
     FILE **files = (FILE **)malloc(sizeof(FILE) * (argc - 1));
     char *line = (char *)malloc(sizeof(char) * 100);
-    input = parse_input(argc, &num_files, &n, argv, files);
-    if(input > 0) {
-        for(i = 0; i < num_files; i++) {
-            if(files[i]) {
-                while((line = get_line(files[i], line)) && line[0] != '\0') {
-                    get_words(line, &hash_table);
-                    memset(line, 0, sizeof(char) * 100);
-                }
-                fclose(files[i]);
-            }
-        }
-    }
-    else {
+    if(argc == 1)
+    {
         while((line = get_line(stdin, line)) && line[0] != '\0' && line[0] != '\n') {
             get_words(line, &hash_table);
             memset(line, 0, sizeof(char) * 100);
+            n = hash_table.items;
         }
+    } else {
+        n = parse_input(argc, argv, &hash_table);
     }
     free(files);
     free(line);
@@ -245,7 +238,7 @@ int main(int argc, char *argv[]) {
             p++;
         }
     }
-    quick_sort(occurrences, 0, hash_table.items);
+    quick_sort(occurrences, 0, hash_table.items - 1);
     printf("The top %d words (out of %d) are:\n", n, hash_table.items);
     for(i=0; i < n && i < hash_table.items; i++) {
         printf("%9d %s\n", occurrences[i]->frequency, occurrences[i]->word);
