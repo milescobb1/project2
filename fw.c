@@ -113,8 +113,7 @@ int parse_input(int argc, int *num_files, int *n, char *argv[], FILE **files) {
                     }
                 }
                 if(argc > 3) {
-                    open_files(num_files, 3, argc, argv, files);
-                    return 1;
+                    return 3;
                 }
                 else {
                     return 0;
@@ -128,7 +127,6 @@ int parse_input(int argc, int *num_files, int *n, char *argv[], FILE **files) {
         }
         else {
             *n = 10;
-            open_files(num_files, 1, argc, argv, files);
             return 1;
         }
     }
@@ -216,22 +214,27 @@ int main(int argc, char *argv[]) {
     int input;
     Occurrence **occurrences = NULL;
     HashTable hash_table = init_table();
+    FILE *new_file = NULL;
     FILE **files = (FILE **)malloc(sizeof(FILE) * (argc - 1));
     char *line = (char *)malloc(sizeof(char) * 100);
     input = parse_input(argc, &num_files, &n, argv, files);
     if(input > 0) {
-        for(i = 0; i < num_files; i++) {
-            if(files[i]) {
-                while((line = get_line(files[i], line)) && line[0] != '\0') {
+        for(i = input; i < argc; i++) {
+            new_file = fopen(argv[i], "r");
+            if(new_file) {
+                while((line = get_line(new_file, line)) && line[0] != '\0') {
                     get_words(line, &hash_table);
                     memset(line, 0, sizeof(char) * 100);
                 }
-                fclose(files[i]);
+                fclose(new_file);
+            }
+            else {
+                fprintf(stderr, "%s: %s\n", argv[i], strerror(errno));
             }
         }
     }
     else {
-        while((line = get_line(stdin, line)) && line[0] != '\0' && line[0] != '\n') {
+        while((line = get_line(stdin, line)) && line[0] != '\0') {
             get_words(line, &hash_table);
             memset(line, 0, sizeof(char) * 100);
         }
@@ -245,11 +248,14 @@ int main(int argc, char *argv[]) {
             p++;
         }
     }
-    quick_sort(occurrences, 0, hash_table.items);
+    quick_sort(occurrences, 0, hash_table.items - 1);
     printf("The top %d words (out of %d) are:\n", n, hash_table.items);
+    new_file = fopen("output.txt", "w");
     for(i=0; i < n && i < hash_table.items; i++) {
         printf("%9d %s\n", occurrences[i]->frequency, occurrences[i]->word);
+        fprintf(new_file, "%s\n", occurrences[i]->word);
     }
+    fclose(new_file);
     for(i = 0; i < hash_table.size; i++) {
         if(hash_table.table[i]) {
             free(hash_table.table[i]->word);
