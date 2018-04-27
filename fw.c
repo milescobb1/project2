@@ -77,7 +77,7 @@ void add_word(char *word, int frequency, unsigned long hash_code, HashTable *has
 void rehash(HashTable *hash_table) {
     int i;
     int old_size;
-    Occurrence **newTable = (Occurrence**)malloc(sizeof(Occurrence) * hash_table->size * 2);
+    Occurrence **newTable = (Occurrence**)malloc(sizeof(Occurrence*) * hash_table->size * 2);
     Occurrence **temp = hash_table->table;
     hash_table->table = newTable;
     hash_table->items = 0;
@@ -90,14 +90,14 @@ void rehash(HashTable *hash_table) {
         if(temp[i]) {
             add_word(temp[i]->word, temp[i]->frequency, hash(temp[i]->word), hash_table);
             free(temp[i]->word);
+            free(temp[i]);
         }
-        free(temp[i]);
     }
     free(temp);
 }
 
 /* This is a horrific function */
-int parse_input(int argc, int *num_files, int *n, char *argv[], FILE **files) {
+int parse_input(int argc, int *num_files, int *n, char *argv[]) {
     int i;
     if(argc > 1) {
         if(!strcmp(argv[1], "-n")) {
@@ -215,9 +215,8 @@ int main(int argc, char *argv[]) {
     Occurrence **occurrences = NULL;
     HashTable hash_table = init_table();
     FILE *new_file = NULL;
-    FILE **files = (FILE **)malloc(sizeof(FILE) * (argc - 1));
     char *line = (char *)malloc(sizeof(char) * 100);
-    input = parse_input(argc, &num_files, &n, argv, files);
+    input = parse_input(argc, &num_files, &n, argv);
     if(input > 0) {
         for(i = input; i < argc; i++) {
             new_file = fopen(argv[i], "r");
@@ -239,23 +238,18 @@ int main(int argc, char *argv[]) {
             memset(line, 0, sizeof(char) * 100);
         }
     }
-    free(files);
     free(line);
-    occurrences = (Occurrence**)malloc(sizeof(Occurrence) * hash_table.items);
+    occurrences = (Occurrence**)malloc(sizeof(Occurrence*) * hash_table.items);
     for(i = 0, p = 0; i < hash_table.size; i++) {
         if(hash_table.table[i]) {
-            occurrences[p] = hash_table.table[i];
-            p++;
+            occurrences[p++] = hash_table.table[i];
         }
     }
     quick_sort(occurrences, 0, hash_table.items - 1);
     printf("The top %d words (out of %d) are:\n", n, hash_table.items);
-    new_file = fopen("output.txt", "w");
-    for(i=0; i < n && i < hash_table.items; i++) {
+    for(i = 0; i < n && i < hash_table.items; i++) {
         printf("%9d %s\n", occurrences[i]->frequency, occurrences[i]->word);
-        fprintf(new_file, "%s\n", occurrences[i]->word);
     }
-    fclose(new_file);
     for(i = 0; i < hash_table.size; i++) {
         if(hash_table.table[i]) {
             free(hash_table.table[i]->word);

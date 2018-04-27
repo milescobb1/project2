@@ -8,7 +8,7 @@ typedef struct occurrence Occurrence;
 
 typedef struct hashtable HashTable;
 
-#define TABLESIZE 100000
+#define TABLESIZE 1000000
 
 struct occurrence {
     char *word;
@@ -29,7 +29,7 @@ unsigned long hash (const char* word);
 
 void rehash(HashTable *hash_table);
 
-int parse_input(int argc, int *num_files, int *n, char *argv[], FILE **files);
+int parse_input(int argc, int *num_files, int *n, char *argv[]);
 
 void open_files(int *num_files, int start, int end, char *argv[], FILE **files);
 
