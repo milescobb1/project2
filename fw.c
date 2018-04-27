@@ -1,12 +1,9 @@
 #include "fw.h"
 
 
-void quick_sort(Occurrence *a[], int l, int r)
-{
+void quick_sort(Occurrence *a[], int l, int r) {
     int j;
-
-    if(l < r) 
-    {
+    if(l < r) {
         j = partition(a, l, r);
         quick_sort(a, l, j - 1);
         quick_sort(a, j + 1, r);
@@ -99,26 +96,34 @@ void rehash(HashTable *hash_table) {
     free(temp);
 }
 
+/* This is a horrific function */
 int parse_input(int argc, int *num_files, int *n, char *argv[], FILE **files) {
     int i;
     if(argc > 1) {
         if(!strcmp(argv[1], "-n")) {
-            for(i = 0; i < strlen(argv[2]); i++) {
-                if (isdigit(argv[2][i])) {
-                    (*n) += atoi(&argv[2][i]);
+            if(argc > 2) {
+                for(i = 0; i < strlen(argv[2]); i++) {
+                    if (isdigit(argv[2][i])) {
+                        (*n) += atoi(&argv[2][i]);
+                    }
+                    else {
+                        fprintf(stderr, "usage: fw [-n num] [ file1 [ file2 [...] ] ]\n");
+                        exit(0);
+                        return -1;
+                    }
                 }
-                else {
-                    fprintf(stderr, "Usage: tw -n <num> file1 [file2...]\n");
-                    exit(0);
-                    return -1;
-                }
-                if(argc > 2) {
+                if(argc > 3) {
                     open_files(num_files, 3, argc, argv, files);
                     return 1;
                 }
                 else {
                     return 0;
                 }
+            }
+            else {
+                fprintf(stderr, "usage: fw [-n num] [ file1 [ file2 [...] ] ]\n");
+                exit(0);
+                return -1;
             }
         }
         else {
@@ -140,7 +145,7 @@ void open_files(int *num_files, int start, int end, char *argv[], FILE **files) 
             files[(*num_files)++] = new_file;
         }
         else {
-            fprintf(stderr, "Cannot open file: %s\n", strerror(errno));
+            fprintf(stderr, "%s: %s\n", argv[i + start], strerror(errno));
         }
     }
 }
@@ -240,16 +245,15 @@ int main(int argc, char *argv[]) {
             p++;
         }
     }
-    quick_sort(occurrences, 0, hash_table.items - 1);
+    quick_sort(occurrences, 0, hash_table.items);
     printf("The top %d words (out of %d) are:\n", n, hash_table.items);
     for(i=0; i < n && i < hash_table.items; i++) {
         printf("%9d %s\n", occurrences[i]->frequency, occurrences[i]->word);
     }
-    for(i = 0, p = 0; i < hash_table.size; i++) {
+    for(i = 0; i < hash_table.size; i++) {
         if(hash_table.table[i]) {
             free(hash_table.table[i]->word);
             free(hash_table.table[i]);
-            p++;
         }
     }
     free(occurrences);
