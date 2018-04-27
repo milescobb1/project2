@@ -38,7 +38,7 @@ HashTable init_table() {
     HashTable hash_table;
     hash_table.size = TABLESIZE;
     hash_table.items = 0;
-    hash_table.table = (Occurrence**)malloc(sizeof(Occurrence) * TABLESIZE);
+    hash_table.table = (Occurrence**)malloc(sizeof(Occurrence*) * TABLESIZE);
     for(i = 0; i < TABLESIZE; i++) {
         hash_table.table[i] = NULL;
     }
@@ -97,7 +97,7 @@ void rehash(HashTable *hash_table) {
 }
 
 /* This is a horrific function */
-int parse_input(int argc, int *num_files, int *n, char *argv[]) {
+int parse_input(int argc, int *n, char *argv[]) {
     int i;
     if(argc > 1) {
         if(!strcmp(argv[1], "-n")) {
@@ -132,20 +132,6 @@ int parse_input(int argc, int *num_files, int *n, char *argv[]) {
     }
     *n = 10;
     return 0;
-}
-
-void open_files(int *num_files, int start, int end, char *argv[], FILE **files) {
-    int i;
-    FILE *new_file = NULL;
-    for(i = 0; i < end - start; i++) {
-        new_file = fopen(argv[i + start], "r");
-        if(new_file) {
-            files[(*num_files)++] = new_file;
-        }
-        else {
-            fprintf(stderr, "%s: %s\n", argv[i + start], strerror(errno));
-        }
-    }
 }
 
 char *get_line(FILE *file, char *line) {
@@ -210,13 +196,12 @@ int main(int argc, char *argv[]) {
     int i;
     int p;
     int n = 0;
-    int num_files = 0;
     int input;
     Occurrence **occurrences = NULL;
     HashTable hash_table = init_table();
     FILE *new_file = NULL;
     char *line = (char *)malloc(sizeof(char) * 100);
-    input = parse_input(argc, &num_files, &n, argv);
+    input = parse_input(argc, &n, argv);
     if(input > 0) {
         for(i = input; i < argc; i++) {
             new_file = fopen(argv[i], "r");
